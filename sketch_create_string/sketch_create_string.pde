@@ -2,6 +2,8 @@ boolean easy = true;
 String theme;
 int index = 0;
 int t = 0;
+int side = 80;
+int px, py;
 
 
 State state;
@@ -10,13 +12,13 @@ void setup() {
   textAlign(CENTER);
   PFont font = createFont("MS Gothic", 50);
   textFont (font);
+  rectMode(CENTER);
 }
 
 void draw() {
   background(255);
   fill(0);
-  textSize(100);
-  text("Create letters", 50, 100);
+  
   state = new Title();
 }
 
@@ -58,6 +60,7 @@ class Title extends State {
 class Game extends State {
   void drawState() {
     text("Game (for 5 seconds)", width * 0.5, height * 0.5);
+    rect(width/2, height/1.75, side*5, side*5);
   }
 
   State decideState() {

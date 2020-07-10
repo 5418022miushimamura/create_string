@@ -1,7 +1,7 @@
 boolean easy = true;
 String theme;
-int index = -1;  // 0文字目を取得した状態で，index = 0
-int t = 60, tm = 0;
+int index;  // 0文字目を取得した状態で，index = 0
+int t, tm;
 int side = 80;
 float px, py;
 
@@ -14,11 +14,6 @@ void setup() {
   PFont font = createFont("MS Gothic", 50);
   textFont (font);
 
-  px = 800/2;
-  py = 800/1.75;
-
-  theme = "EE";
-  //makeTheme();
   state = new Title();
 }
 
@@ -43,11 +38,19 @@ abstract class State {
 class Title extends State {
   void drawState() {
     fill(0);
+    textSize(70);
     text("Create letters", width * 0.5, height * 0.3);
+    textSize(30);
     text("Press 'F' key to start easy, 'J' key to start hard", width * 0.5, height * 0.7);
   }
 
   State decideState() {
+    t = 60;
+    tm = 0;
+    index = -1;
+    px = 800/2;
+    py = 800/1.75;
+    makeTheme();
     if (keyPressed && key == 'f') { // if 'f' key is pressed
       return new Game(); // start game
     }
@@ -79,8 +82,12 @@ class Game extends State {
     if (tm == 0) {
       time++;
       if (time >= 2) {
-        letters[n] = new Letter();
-        letters[n].decideY();
+        int isVer = int(random(2)), isTopOrLelf = int(random(2));
+        if (isVer == 0)
+          letters[n] = new MoveVertical(n, isTopOrLelf);
+        else
+          letters[n] = new MoveHorizontal(n, isTopOrLelf);
+
         n++;
         time = 0;
       }
@@ -90,8 +97,7 @@ class Game extends State {
         if (index+2 <= theme.length())
           letters[i].collision();
         letters[i].display();
-        //letters[i].moveVertical();
-        letters[i].moveHorizontal();
+        letters[i].move();
       }
     }
     if (index+2 <= theme.length())
@@ -108,32 +114,31 @@ class Game extends State {
   }
 }
 
-class Letter {
+abstract class Letter {
   float min_px = width/2 - side * 2;  // 0列目
   float min_py = height/1.75 - side * 1.5;  // 0行目
   int id = int(random(5));
   float lx, ly;
+  String c;
 
-  /* 以下decideは1回のみ呼び出す */
-  void decideX() {  // 何列目か位置を確定する
-    lx = min_px + float(side * id);
-    //ly = 0;
-    ly = height;
+  Letter(int i) {
+    int index;
+    if (i % 2 == 0) {
+      index = int(random(theme.length()));
+      c = theme.substring(index, index+1);
+    } else {
+      index = int(random(26));
+      char cc = (char)(index + 'A');
+      c = String.valueOf(cc);
+    }
   }
-  void decideY() {  // 何行目か位置を確定する
-    lx = 0;
-    //lx = width;
-    ly = min_py + float(side * id);
-    println("ly:" + ly);
-  }
+
   int dx = 1, dy = 1;
-  String c = "E";  //後でランダムにする
   String next_c = theme.substring(index+1, index+2);
   boolean isHit = false;
 
   void collision() {
     if (dist(px, py, lx, ly - side/2) < side/2) {  // 文字とぶつかった
-      println("c:" + next_c);
       isHit = true;
       if (c.equals(next_c)) { // 正解
         index++;
@@ -146,11 +151,44 @@ class Letter {
     fill(0);
     text(c, lx, ly);
   }
-  void moveVertical() {  // 縦
-    ly -= dy;
+  abstract void move();
+}
+
+class MoveVertical extends Letter {
+  int isTopOrLelf;
+  MoveVertical(int i, int isTopOrLelf0) {
+    super(i);
+    isTopOrLelf = isTopOrLelf0;
+    lx = min_px + float(side * id);
+    if (isTopOrLelf == 0)
+      ly = 0;
+    else
+      ly = height;
   }
-  void moveHorizontal() {  // 横
-    lx += dx;
+  void move() {  // 縦
+    if (isTopOrLelf == 0)
+      ly += dy;
+    else
+      ly -= dy;
+  }
+}
+
+class MoveHorizontal extends Letter {
+  int isTopOrLelf;
+  MoveHorizontal(int i, int isTopOrLelf0) {
+    super(i);
+    isTopOrLelf = isTopOrLelf0;
+    if (isTopOrLelf == 0)
+      lx = 0;
+    else
+      lx = width;
+    ly = min_py + float(side * id);
+  }
+  void move() {  // 横
+    if (isTopOrLelf == 0)
+      lx += dx;
+    else
+      lx -= dx;
   }
 }
 
@@ -193,16 +231,16 @@ class End extends State {
   void drawState() {
     fill(0);
     text("Result", width * 0.5, height * 0.5);
+    textSize(30);
     if (t <= 0) {
       text("not clear a stage", width * 0.5, height * 0.7);
     } else {
       text("clear a stage", width * 0.5, height * 0.7);
     }
-    text("to title (press some key).", width * 0.5, height * 0.7);
+    text("to title (press some key).", width * 0.5, height * 0.9);
   }
 
   State decideState() {
-    t = 60;
     if (keyPressed && key == ENTER) {
       return new Title();
     }

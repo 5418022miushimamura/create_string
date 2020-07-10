@@ -1,4 +1,4 @@
-boolean easy = true;
+boolean easy;
 String theme;
 int index;  // 0文字目を取得した状態で，index = 0
 int t, tm;
@@ -52,6 +52,7 @@ class Title extends State {
     py = 800/1.75;
     makeTheme();
     if (keyPressed && key == 'f') { // if 'f' key is pressed
+      easy = true;
       return new Game(); // start game
     }
     if (keyPressed && key == 'j') {
@@ -215,7 +216,14 @@ void keyPressed() {
 }
 
 void makeTheme() {
-  String[] makethemes= {"AAA", "BBB", "CCC", "DDD", "EEEEE", "FFFFF", "GGGGG", "HHHHH", "IIIII", "JJJJJJJJ", "KKKKK", "LLLLLLL", "MMMMMMM", "NNNNNN", "OOO", "PPP", "QQQ", "RRR", "SSS", "TTTTT", "UUUUU"};
+  String[] makethemes = new String[200];
+  if (easy) {
+    String[] makeEasy = {"AAA", "BBB", "CCC", "DDD", "EEEEE", "FFFFF", "GGGGG", "HHHHH"};
+    makethemes = makeEasy;
+  } else {
+    String[] makeHard = {"IIIII", "JJJJJJJJ", "KKKKK", "LLLLLLL", "MMMMMMM", "NNNNNN", "OOO", "PPP", "QQQ", "RRR", "SSS", "TTTTT", "UUUUU"};
+    makethemes = makeHard;
+  }
   theme = makethemes[int(random(makethemes.length))];
 }
 

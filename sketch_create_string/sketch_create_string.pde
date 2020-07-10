@@ -6,18 +6,19 @@ int side = 80;
 float px, py;
 
 State state;
-Letter[] letters;
+Letter[] letters = new Letter[30];
 
 void setup() { 
   size(800, 800); 
   textAlign(CENTER);
   PFont font = createFont("MS Gothic", 50);
   textFont (font);
-  
-  px = 800/2 + side * 0.5;
-  py = 800/1.75 + side * 0.5;
 
-  makeTheme();
+  px = 800/2;
+  py = 800/1.75;
+
+  theme = "EE";
+  //makeTheme();
   state = new Title();
 }
 
@@ -59,6 +60,7 @@ class Title extends State {
 }
 
 class Game extends State {
+  int time, n = 0;
   void drawState() {
     for (int i=1; i<=4; i++) {
       line(width/4, height/1.75/1.75+i*side, width/4*3, height/1.75/1.75+i*side);
@@ -73,11 +75,29 @@ class Game extends State {
     text("今まで取得した文字列："+theme.substring(0, index+1), 0, height/10+side);
     textAlign(CENTER);
     textSize(side);
-    text(theme.substring(index+1, index+1), 700, height/10); 
-    //text(Letter.c,Letter.lx,Letter.ly);
 
+    if (tm == 0) {
+      time++;
+      if (time >= 2) {
+        letters[n] = new Letter();
+        letters[n].decideY();
+        n++;
+        time = 0;
+      }
+    }
+    for (int i = 0; i < n; i++) {
+      if (!(letters[i].isHit)) {
+        if (index+2 <= theme.length())
+          letters[i].collision();
+        letters[i].display();
+        //letters[i].moveVertical();
+        letters[i].moveHorizontal();
+      }
+    }
+    if (index+2 <= theme.length())
+      text(theme.substring(index+1, index+2), 700, height/10); // 次に取得する文字
     fill(255);
-    ellipse(px-side/2, py-side/2, side/2, side/2);
+    ellipse(px, py, side/2, side/2);
   }
 
   State decideState() {
@@ -89,30 +109,37 @@ class Game extends State {
 }
 
 class Letter {
-  float min_px = width/2 - side * 1.5 - side/2;  // 0列目
-  float min_py = height/1.75 - side * 1.5 - side/2;  // 0行目
+  float min_px = width/2 - side * 2;  // 0列目
+  float min_py = height/1.75 - side * 1.5;  // 0行目
   int id = int(random(5));
   float lx, ly;
 
   /* 以下decideは1回のみ呼び出す */
   void decideX() {  // 何列目か位置を確定する
     lx = min_px + float(side * id);
-    ly = 0;
+    //ly = 0;
+    ly = height;
   }
   void decideY() {  // 何行目か位置を確定する
     lx = 0;
+    //lx = width;
     ly = min_py + float(side * id);
+    println("ly:" + ly);
   }
-  int dx = 3, dy = 3;
-  String c = "A";  //後でランダムにする
-  String next_c = theme.substring(index+1, index+1);
+  int dx = 1, dy = 1;
+  String c = "E";  //後でランダムにする
+  String next_c = theme.substring(index+1, index+2);
+  boolean isHit = false;
 
   void collision() {
-    if (dist(px, py, lx, ly) < side) {  // 文字とぶつかった
-      if (c == next_c)  // 正解
+    if (dist(px, py, lx, ly - side/2) < side/2) {  // 文字とぶつかった
+      println("c:" + next_c);
+      isHit = true;
+      if (c.equals(next_c)) { // 正解
         index++;
-      else  // 不正解
-      t -= 3;
+      } else { // 不正解
+        t -= 3;
+      }
     }
   }
   void display() {
@@ -120,7 +147,7 @@ class Letter {
     text(c, lx, ly);
   }
   void moveVertical() {  // 縦
-    ly += dy;
+    ly -= dy;
   }
   void moveHorizontal() {  // 横
     lx += dx;
@@ -132,10 +159,10 @@ class Letter {
 void keyPressed() {
   if (key == CODED) {// コード化されているキーが押された
 
-    float min_px = width/2 - side * 1.5;
-    float max_px = width/2 + side * 2.5;
-    float min_py = height/1.75 - side * 1.5;
-    float max_py = height/1.75 + side * 2.5;
+    float min_px = width/2 - side * 2;
+    float max_px = width/2 + side * 2;
+    float min_py = height/1.75 - side * 2;
+    float max_py = height/1.75 + side * 2;
 
     if (keyCode == RIGHT && px < max_px) {
       px += side;
@@ -151,7 +178,7 @@ void keyPressed() {
 
 void makeTheme() {
   String[] makethemes= {"AAA", "BBB", "CCC", "DDD", "EEEEE", "FFFFF", "GGGGG", "HHHHH", "IIIII", "JJJJJJJJ", "KKKKK", "LLLLLLL", "MMMMMMM", "NNNNNN", "OOO", "PPP", "QQQ", "RRR", "SSS", "TTTTT", "UUUUU"};
-  theme = makethemes[int(random(makethemes.length+1))];
+  theme = makethemes[int(random(makethemes.length))];
 }
 
 void timer() {
@@ -164,6 +191,7 @@ void timer() {
 
 class End extends State {
   void drawState() {
+    fill(0);
     text("Result", width * 0.5, height * 0.5);
     if (t <= 0) {
       text("not clear a stage", width * 0.5, height * 0.7);

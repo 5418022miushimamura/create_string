@@ -2,7 +2,7 @@ boolean easy;
 String theme;
 int index;  // 0文字目を取得した状態で，index = 0
 int t, tm;
-int side = 80;
+int side = 80;  // マス1つ分の辺の長さ
 float px, py;
 
 State state;
@@ -36,6 +36,15 @@ abstract class State {
 }
 
 class Title extends State {
+  Title() {
+    t = 60;
+    tm = 0;
+    index = -1;
+    px = 800/2;
+    py = 800/1.75;
+    makeTheme();
+  }
+  
   void drawState() {
     fill(0);
     textSize(70);
@@ -45,12 +54,6 @@ class Title extends State {
   }
 
   State decideState() {
-    t = 60;
-    tm = 0;
-    index = -1;
-    px = 800/2;
-    py = 800/1.75;
-    makeTheme();
     if (keyPressed && key == 'f') { // if 'f' key is pressed
       easy = true;
       return new Game(); // start game
@@ -75,7 +78,7 @@ class Game extends State {
     textSize(side/4);
     textAlign(LEFT);
     text("お題："+theme, 0, height/10);
-    text("残り時間："+t+"seconds", 0, height/10+side/2);
+    text("残り時間：" + t + "seconds", 0, height/10+side/2);
     text("今まで取得した文字列："+theme.substring(0, index+1), 0, height/10+side);
     textAlign(CENTER);
     textSize(side);
@@ -123,27 +126,27 @@ abstract class Letter {
   String c;
 
   Letter(int i) {
-    int index;
-    if (i % 2 == 0) {
-      index = int(random(theme.length()));
-      c = theme.substring(index, index+1);
+    //int index;
+    if (i % 3 == 0) {
+      //index = int(random(theme.length()));
+      c = theme.substring(index+1, index+2);
     } else {
-      index = int(random(26));
-      char cc = (char)(index + 'A');
+      int id = int(random(26));
+      char cc = (char)(id + 'A');
       c = String.valueOf(cc);
     }
   }
 
-  int dx = 1, dy = 1;
+  int dx = 1, dy = 1; // 文字の速度
   String next_c = theme.substring(index+1, index+2);
   boolean isHit = false;
 
   void collision() {
     if (dist(px, py, lx, ly - side/2) < side/2) {  // 文字とぶつかった
       isHit = true;
-      if (c.equals(next_c)) { // 正解
+      if (c.equals(next_c)) {  // 正解
         index++;
-      } else { // 不正解
+      } else {  // 不正解
         t -= 3;
       }
     }
@@ -193,42 +196,43 @@ class MoveHorizontal extends Letter {
   }
 }
 
-/* (void playerの代わり - px, pyはグローバル)
- px, pyはplayerのいるマスの右下の座標を指す. */
 void keyPressed() {
-  if (key == CODED) {// コード化されているキーが押された
+  if (key == CODED)  // コード化されているキーが押された
+    player();
+}
 
-    float min_px = width/2 - side * 2;
-    float max_px = width/2 + side * 2;
-    float min_py = height/1.75 - side * 2;
-    float max_py = height/1.75 + side * 2;
+void player() {
+  /* px, pyはplayerのいるマスの右下の座標を指す.
+     - (px, pyはグローバル)*/
+  float min_px = width/2 - side * 2;
+  float max_px = width/2 + side * 2;
+  float min_py = height/1.75 - side * 2;
+  float max_py = height/1.75 + side * 2;
 
-    if (keyCode == RIGHT && px < max_px) {
-      px += side;
-    } else if (keyCode == LEFT && px > min_px) {
-      px -= side;
-    } else if (keyCode == UP && py > min_py) {
-      py -= side;
-    } else if (keyCode == DOWN && py < max_py) {
-      py += side;
-    }
-  }
+  if (keyCode == RIGHT && px < max_px)
+    px += side;
+  else if (keyCode == LEFT && px > min_px)
+    px -= side;
+  else if (keyCode == UP && py > min_py)
+    py -= side;
+  else if (keyCode == DOWN && py < max_py)
+    py += side;
 }
 
 void makeTheme() {
-  String[] makethemes = new String[200];
+  String[] makeThemes = new String[200];
   if (easy) {
-    String[] makeEasy = {"AAA", "BBB", "CCC", "DDD", "EEEEE", "FFFFF", "GGGGG", "HHHHH"};
-    makethemes = makeEasy;
+    String[] makeEasy = {"HEAP", "SORT", "PDE", "SOFT", "JAVA", "RUBY", "QUE"};
+    makeThemes = makeEasy;
   } else {
-    String[] makeHard = {"IIIII", "JJJJJJJJ", "KKKKK", "LLLLLLL", "MMMMMMM", "NNNNNN", "OOO", "PPP", "QQQ", "RRR", "SSS", "TTTTT", "UUUUU"};
-    makethemes = makeHard;
+    String[] makeHard = {"QUERY", "SERVER", "NETWORK", "OBJECT", "STACK", "PROGRAM", "PYTHON"};
+    makeThemes = makeHard;
   }
-  theme = makethemes[int(random(makethemes.length))];
+  theme = makeThemes[int(random(makeThemes.length))];
 }
 
 void timer() {
-  tm++;//時間設定
+  tm++;  //時間設定
   if (tm == 60) {
     t--;
     tm = 0;
@@ -245,7 +249,7 @@ class End extends State {
     } else {
       text("clear a stage", width * 0.5, height * 0.7);
     }
-    text("to title (press some key).", width * 0.5, height * 0.9);
+    text("to title (press enter key).", width * 0.5, height * 0.9);
   }
 
   State decideState() {

@@ -129,13 +129,11 @@ abstract class Letter {
   String c;
 
   Letter(int i) {
-    //int index;
     if (i % 3 == 0) {
-      //index = int(random(theme.length()));
-      c = theme.substring(index+1, index+2);
+      c = theme.substring(index +1, index +2);
     } else {
-      int id = int(random(26));
-      char cc = (char)(id + 'A');
+      int idOfChar = int(random(26));
+      char cc = (char)(idOfChar + 'A');
       c = String.valueOf(cc);
     }
   }

@@ -6,7 +6,7 @@ int side = 80;  // マス1つ分の辺の長さ
 float px, py;
 
 State state;
-Letter[] letters = new Letter[30];
+Letter[] letters = new Letter[60];
 
 void setup() { 
   size(800, 800); 
@@ -36,15 +36,14 @@ abstract class State {
 }
 
 class Title extends State {
-  Title() {
+  Title() {  // 初期化
     t = 60;
     tm = 0;
     index = -1;
     px = 800/2;
     py = 800/1.75;
-    makeTheme();
   }
-  
+
   void drawState() {
     fill(0);
     textSize(70);
@@ -54,12 +53,14 @@ class Title extends State {
   }
 
   State decideState() {
-    if (keyPressed && key == 'f') { // if 'f' key is pressed
+    if (keyPressed && key == 'f') {  // if 'f' key is pressed
       easy = true;
+      makeTheme();
       return new Game(); // start game
     }
-    if (keyPressed && key == 'j') {
+    if (keyPressed && key == 'j') {  // if 'j' key is pressed
       easy = false;
+      makeTheme();
       return new Game(); // start game
     }
     return this;
@@ -85,7 +86,7 @@ class Game extends State {
 
     if (tm == 0) {
       time++;
-      if (time >= 2) {
+      if (time >= 1) {
         int isVer = int(random(2)), isTopOrLelf = int(random(2));
         if (isVer == 0)
           letters[n] = new MoveVertical(n, isTopOrLelf);
@@ -104,8 +105,10 @@ class Game extends State {
         letters[i].move();
       }
     }
-    if (index+2 <= theme.length())
+    if (index+2 <= theme.length()) {
+      fill(0, 0, 255);
       text(theme.substring(index+1, index+2), 700, height/10); // 次に取得する文字
+    }
     fill(255);
     ellipse(px, py, side/2, side/2);
   }
@@ -203,7 +206,7 @@ void keyPressed() {
 
 void player() {
   /* px, pyはplayerのいるマスの右下の座標を指す.
-     - (px, pyはグローバル)*/
+   - (px, pyはグローバル)*/
   float min_px = width/2 - side * 2;
   float max_px = width/2 + side * 2;
   float min_py = height/1.75 - side * 2;
@@ -244,11 +247,10 @@ class End extends State {
     fill(0);
     text("Result", width * 0.5, height * 0.5);
     textSize(30);
-    if (t <= 0) {
+    if (t <= 0)
       text("not clear a stage", width * 0.5, height * 0.7);
-    } else {
+    else
       text("clear a stage", width * 0.5, height * 0.7);
-    }
     text("to title (press enter key).", width * 0.5, height * 0.9);
   }
 

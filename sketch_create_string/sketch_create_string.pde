@@ -70,6 +70,7 @@ class Title extends State {
 class Game extends State {
   int time, n = 0;
   void drawState() {
+    background(255);
     for (int i=1; i<=4; i++) {
       line(width/4, height/1.75/1.75+i*side, width/4*3, height/1.75/1.75+i*side);
       line(width/4+i*side, height/1.75/1.75, width/4+i*side, height/1.75/1.75+side*5);
@@ -139,10 +140,10 @@ abstract class Letter {
   }
 
   int dx = 1, dy = 1; // 文字の速度
-  String next_c = theme.substring(index+1, index+2);
   boolean isHit = false;
 
   void collision() {
+    String next_c = theme.substring(index+1, index+2);
     if (dist(px, py, lx, ly - side/2) < side/2) {  // 文字とぶつかった
       isHit = true;
       if (c.equals(next_c)) {  // 正解

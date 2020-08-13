@@ -4,16 +4,21 @@ int index;  // 0文字目を取得した状態で，index = 0
 int t, tm;
 int side = 80;  // マス1つ分の辺の長さ
 float px, py;
-
 State state;
 Letter[] letters = new Letter[60];
+PImage title_img;
+PImage clear_img;
+PImage not_clear_img;
+PImage game_img;
 
 void setup() { 
   size(800, 800); 
   textAlign(CENTER);
-  PFont font = createFont("MS Gothic", 50);
+  PFont font = createFont("Verdana-Bold", 50);
   textFont (font);
-
+  title_img = loadImage("title_ten.png");
+  clear_img = loadImage("clear.jpg");
+  not_clear_img = loadImage("not_clear.jpg");
   state = new Title();
 }
 
@@ -30,7 +35,6 @@ abstract class State {
     }
     return decideState();
   }
-
   abstract void drawState();    // 状態に応じた描画を行う
   abstract State decideState(); // 次の状態を返す
 }
@@ -43,15 +47,10 @@ class Title extends State {
     px = 800/2;
     py = 800/1.75;
   }
-
+  
   void drawState() {
-    fill(0);
-    textSize(70);
-    text("Create letters", width * 0.5, height * 0.3);
-    textSize(30);
-    text("Press 'F' key to start easy, 'J' key to start hard", width * 0.5, height * 0.7);
+    image(title_img, 0, 0,width,height);
   }
-
   State decideState() {
     if (keyPressed && key == 'f') {  // if 'f' key is pressed
       easy = true;
@@ -70,18 +69,23 @@ class Title extends State {
 class Game extends State {
   int time, n = 0;
   void drawState() {
-    background(255);
     for (int i=1; i<=4; i++) {
       line(width/4, height/1.75/1.75+i*side, width/4*3, height/1.75/1.75+i*side);
       line(width/4+i*side, height/1.75/1.75, width/4+i*side, height/1.75/1.75+side*5);
     }
-
-    fill(255, 0, 0);
+    textSize(side/3);
+    fill(255,0,0);
+    text("time",50,120);
+    textSize(side*1.5);
+    fill(255,0,0,50);
+    text("〇",150,150);
+    textSize(side/2);
+    fill(255,0,0);
+    text(t, 150, 120);
     textSize(side/4);
     textAlign(LEFT);
-    text("お題："+theme, 0, height/10);
-    text("残り時間：" + t + "seconds", 0, height/10+side/2);
-    text("今まで取得した文字列："+theme.substring(0, index+1), 0, height/10+side);
+    text("thema ："+theme, 25, 200);
+    text("gets    ："+theme.substring(0, index+1), 25, 230);
     textAlign(CENTER);
     textSize(side);
 
@@ -93,7 +97,6 @@ class Game extends State {
           letters[n] = new MoveVertical(n, isTopOrLelf);
         else
           letters[n] = new MoveHorizontal(n, isTopOrLelf);
-
         n++;
         time = 0;
       }
@@ -107,13 +110,19 @@ class Game extends State {
       }
     }
     if (index+2 <= theme.length()) {
-      fill(0, 0, 255);
-      text(theme.substring(index+1, index+2), 700, height/10); // 次に取得する文字
+      textSize(side/4);
+      fill(0,0,255);
+      text("next",700,80);
+      textSize(side*2);
+      fill(0,0,255,50);
+      text("□",700,200);
+      textSize(side);
+      fill(0,0,255);
+      text(theme.substring(index+1, index+2), 700, 175); // 次に取得する文字
     }
     fill(255);
     ellipse(px, py, side/2, side/2);
   }
-
   State decideState() {
     if (t <= 0 || theme.length()-1 == index) { // if ellapsed time is larger than
       return new End(); // go to ending
@@ -138,10 +147,10 @@ abstract class Letter {
       c = String.valueOf(cc);
     }
   }
-
+  
   int dx = 1, dy = 1; // 文字の速度
   boolean isHit = false;
-
+  
   void collision() {
     String next_c = theme.substring(index+1, index+2);
     if (dist(px, py, lx, ly - side/2) < side/2) {  // 文字とぶつかった
@@ -210,7 +219,6 @@ void player() {
   float max_px = width/2 + side * 2;
   float min_py = height/1.75 - side * 2;
   float max_py = height/1.75 + side * 2;
-
   if (keyCode == RIGHT && px < max_px)
     px += side;
   else if (keyCode == LEFT && px > min_px)
@@ -243,20 +251,15 @@ void timer() {
 
 class End extends State {
   void drawState() {
-    fill(0);
-    text("Result", width * 0.5, height * 0.5);
-    textSize(30);
     if (t <= 0)
-      text("not clear a stage", width * 0.5, height * 0.7);
+      image(not_clear_img, 0, 0,width,height);
     else
-      text("clear a stage", width * 0.5, height * 0.7);
-    text("to title (press enter key).", width * 0.5, height * 0.9);
+      image(clear_img, 0, 0,width,height);
   }
-
   State decideState() {
     if (keyPressed && key == ENTER) {
       return new Title();
     }
     return this;
   }
-}
+}    
